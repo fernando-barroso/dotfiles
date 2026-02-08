@@ -1,0 +1,8 @@
+# Ripgrep configuration
+# Set RIPGREP_CONFIG_PATH in .zshrc to use this
+
+--smart-case
+--hidden
+--glob=!.git/
+--glob=!node_modules/
+--glob=!.DS_Store

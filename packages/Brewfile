@@ -1,0 +1,57 @@
+# Shared packages — used on both laptop and server
+# Install with: brew bundle --file=~/dotfiles/packages/Brewfile
+
+# ─── Core ────────────────────────────────────────────────────
+brew "git"
+brew "neovim"
+brew "tmux"
+brew "gh"
+brew "wget"
+
+# ─── Search & Navigation ────────────────────────────────────
+brew "fzf"
+brew "ripgrep"
+brew "fd"
+brew "zoxide"
+brew "tree"
+
+# ─── Better Defaults ────────────────────────────────────────
+brew "bat"
+brew "eza"
+brew "btop"
+brew "ncdu"
+brew "jq"
+
+# ─── Git ─────────────────────────────────────────────────────
+brew "lazygit"
+
+# ─── Shell ───────────────────────────────────────────────────
+brew "powerlevel10k"
+brew "direnv"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+brew "stow"
+
+# ─── JavaScript / TypeScript ────────────────────────────────
+brew "node"
+brew "pnpm"
+brew "typescript"
+
+# ─── LLM Tools ──────────────────────────────────────────────
+brew "claude-code"
+# repomix: install via pnpm add -g repomix
+
+# ─── Optional ────────────────────────────────────────────────
+brew "neofetch"
+brew "speedtest-cli"
+
+# ─── Casks (GUI apps) ───────────────────────────────────────
+cask_args appdir: "/Applications"
+cask "discord"
+cask "google-chrome"
+cask "linear-linear"
+cask "obsidian"
+cask "orbstack"
+cask "raycast"
+cask "slack"
+cask "spotify"

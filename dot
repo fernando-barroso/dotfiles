@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ─── Config ──────────────────────────────────────────────────
+DOT_DIR="$HOME/dotfiles"
+
+# ─── Colors ──────────────────────────────────────────────────
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+# ─── Helpers ─────────────────────────────────────────────────
+info()    { echo -e "${BLUE}::${RESET} $*"; }
+success() { echo -e "${GREEN}✓${RESET} $*"; }
+warn()    { echo -e "${YELLOW}!${RESET} $*"; }
+error()   { echo -e "${RED}✗${RESET} $*"; }
+header()  { echo -e "\n${BOLD}$*${RESET}\n"; }
+
+# ─── Commands ────────────────────────────────────────────────
+
+cmd_init() {
+    local server=false
+    for arg in "$@"; do
+        [[ "$arg" == "--server" ]] && server=true
+    done
+
+    header "Dotfiles Init"
+
+    # Homebrew
+    if ! command -v brew &>/dev/null; then
+        info "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+        success "Homebrew installed"
+    else
+        success "Homebrew already installed"
+    fi
+
+    # Shared packages
+    info "Installing shared packages..."
+    brew bundle --file="$DOT_DIR/packages/Brewfile"
+    success "Shared packages installed"
+
+    # Server packages
+    if $server; then
+        info "Installing server packages..."
+        brew bundle --file="$DOT_DIR/packages/Brewfile.server"
+        success "Server packages installed"
+    fi
+
+    # Stow
+    info "Linking dotfiles with stow..."
+    cmd_stow
+    success "Dotfiles linked"
+
+    # TPM (Tmux Plugin Manager)
+    if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
+        info "Installing tmux plugin manager (tpm)..."
+        git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+        success "tpm installed"
+    else
+        success "tpm already installed"
+    fi
+
+    # Global npm packages
+    info "Installing global npm packages..."
+    pnpm add -g repomix
+    success "Global npm packages installed"
+
+    # Server-specific macOS settings
+    if $server; then
+        header "Applying server macOS settings"
+
+        info "Disabling sleep..."
+        sudo pmset -a disablesleep 1
+        sudo pmset -a sleep 0
+        success "Sleep disabled"
+
+        info "Enabling remote login (SSH)..."
+        sudo systemsetup -setremotelogin on
+        success "Remote login enabled"
+
+        info "Disabling Spotlight indexing..."
+        sudo mdutil -a -i off
+        success "Spotlight disabled"
+    fi
+
+    header "Done!"
+    echo -e "Next steps:"
+    echo -e "  1. Update your email in ${BOLD}~/.config/git/config${RESET}"
+    echo -e "  2. Run ${BOLD}p10k configure${RESET} to set up your prompt"
+    echo -e "  3. Open tmux and press ${BOLD}Ctrl+A I${RESET} to install plugins"
+    if $server; then
+        echo -e "  4. Set up ${BOLD}Tailscale${RESET}: tailscale up"
+    fi
+}
+
+cmd_update() {
+    header "Dotfiles Update"
+
+    info "Pulling latest changes..."
+    git -C "$DOT_DIR" pull --rebase
+    success "Repo updated"
+
+    info "Running brew bundle..."
+    brew bundle --file="$DOT_DIR/packages/Brewfile"
+    success "Packages updated"
+
+    info "Re-linking dotfiles..."
+    cmd_stow
+    success "Dotfiles re-linked"
+
+    header "Update complete!"
+}
+
+cmd_doctor() {
+    header "Dotfiles Doctor"
+
+    local tools=(git nvim tmux node pnpm fzf rg fd bat eza zoxide btop lazygit direnv stow gh claude)
+    local all_ok=true
+
+    echo -e "${BOLD}Checking tools:${RESET}"
+    for tool in "${tools[@]}"; do
+        if command -v "$tool" &>/dev/null; then
+            success "$tool"
+        else
+            error "$tool — not found"
+            all_ok=false
+        fi
+    done
+
+    echo ""
+    echo -e "${BOLD}Checking symlinks in ~:${RESET}"
+    local broken_links
+    broken_links=$(find "$HOME" -maxdepth 3 -type l ! -exec test -e {} \; -print 2>/dev/null | head -20)
+    if [[ -z "$broken_links" ]]; then
+        success "No broken symlinks found"
+    else
+        warn "Broken symlinks:"
+        echo "$broken_links" | while read -r link; do
+            error "  $link"
+        done
+        all_ok=false
+    fi
+
+    echo ""
+    if $all_ok; then
+        success "Everything looks good!"
+    else
+        warn "Some issues found — see above"
+    fi
+}
+
+cmd_stow() {
+    stow -d "$DOT_DIR" -t "$HOME" home --restow
+}
+
+cmd_edit() {
+    ${EDITOR:-nvim} "$DOT_DIR"
+}
+
+cmd_backup() {
+    local name="${1:-}"
+    if [[ -z "$name" ]]; then
+        error "Usage: dot backup <name>"
+        exit 1
+    fi
+
+    local backup_dir="$DOT_DIR/backups"
+    mkdir -p "$backup_dir"
+
+    local timestamp
+    timestamp=$(date +%Y%m%d-%H%M%S)
+    local filename="backup-${name}-${timestamp}.tar.gz"
+
+    info "Creating backup: $filename"
+    tar -czf "$backup_dir/$filename" \
+        -C "$HOME" \
+        .zshrc \
+        .p10k.zsh \
+        .config/git \
+        .config/ghostty \
+        .config/tmux \
+        .config/ripgrep \
+        2>/dev/null || true
+
+    success "Backup saved to $backup_dir/$filename"
+}
+
+cmd_help() {
+    echo -e "${BOLD}dot${RESET} — dotfiles manager"
+    echo ""
+    echo -e "${BOLD}Usage:${RESET}"
+    echo "  dot <command> [options]"
+    echo ""
+    echo -e "${BOLD}Commands:${RESET}"
+    echo "  init [--server]    Full setup (Homebrew, packages, stow, tpm)"
+    echo "  update             Pull latest, brew bundle, re-stow"
+    echo "  doctor             Check that all tools are installed"
+    echo "  stow               Re-link dotfiles with stow"
+    echo "  edit               Open dotfiles in \$EDITOR"
+    echo "  backup <name>      Create a tar.gz backup of current configs"
+    echo "  help               Show this help message"
+}
+
+# ─── Main ────────────────────────────────────────────────────
+main() {
+    local cmd="${1:-help}"
+    shift || true
+
+    case "$cmd" in
+        init)   cmd_init "$@" ;;
+        update) cmd_update ;;
+        doctor) cmd_doctor ;;
+        stow)   cmd_stow ;;
+        edit)   cmd_edit ;;
+        backup) cmd_backup "$@" ;;
+        help)   cmd_help ;;
+        *)
+            error "Unknown command: $cmd"
+            cmd_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

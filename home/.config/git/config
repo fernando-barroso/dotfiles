@@ -1,0 +1,22 @@
+[user]
+	name = fernando-barroso
+	email = fernando.barroso@nibbio.co
+
+[init]
+	defaultBranch = main
+
+[core]
+	editor = nvim
+	pager = bat --style=changes
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[alias]
+	s = status -sb
+	co = checkout
+	br = branch
+	lg = log --oneline --graph --decorate -20

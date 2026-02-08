@@ -1,0 +1,5 @@
+# Additional packages for headless Mac Mini server
+# Install with: brew bundle --file=~/dotfiles/packages/Brewfile.server
+
+cask "docker"
+cask "tailscale"
