@@ -1,6 +1,9 @@
 # Ghostty terminal configuration
 # Reference: https://ghostty.org/docs/config
 
+# ─── Theme ───────────────────────────────────────────────────
+theme = Argonaut
+
 # ─── Font ────────────────────────────────────────────────────
 font-family = "Berkeley Mono"
 # font-family = "BerkeleyMono Nerd Font"   # Use after patching
