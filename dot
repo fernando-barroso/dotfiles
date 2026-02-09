@@ -170,15 +170,21 @@ cmd_doctor() {
     done
 
     echo ""
-    echo -e "${BOLD}Checking symlinks in ~:${RESET}"
-    local broken_links
-    broken_links=$(find "$HOME" -maxdepth 3 -type l ! -exec test -e {} \; -print 2>/dev/null | head -20)
+    echo -e "${BOLD}Checking stow symlinks:${RESET}"
+    local broken_links=""
+    # Only check paths that stow manages (from home/ directory)
+    while IFS= read -r rel_path; do
+        local target="$HOME/$rel_path"
+        if [[ -L "$target" && ! -e "$target" ]]; then
+            broken_links+="$target"$'\n'
+        fi
+    done < <(cd "$DOT_DIR/home" && find . -type f -not -name '.gitkeep' | sed 's|^\./||')
     if [[ -z "$broken_links" ]]; then
         success "No broken symlinks found"
     else
         warn "Broken symlinks:"
         echo "$broken_links" | while read -r link; do
-            error "  $link"
+            [[ -n "$link" ]] && error "  $link"
         done
         all_ok=false
     fi
