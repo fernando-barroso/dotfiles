@@ -65,3 +65,7 @@ After running `dot init`, complete these manual steps:
 2. **Prompt** — Run `p10k configure` to set up Powerlevel10k
 3. **Tmux plugins** — Open tmux, press `Ctrl+A I` to install plugins via tpm
 4. **Tailscale** (server) — Run `tailscale up` to connect
+
+## Credit
+
+Took a lot of structure and script inspiration from [@dmmulroy's dotfiles](https://github.com/dmmulroy/.dotfiles) — thanks Dillon!

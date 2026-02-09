@@ -10,7 +10,7 @@ dotfiles/
 │   ├── git/            # Git config, global ignore
 │   ├── ghostty/        # Terminal (laptop only)
 │   ├── nvim/           # Editor (TODO)
-│   ├── opencode/       # AI agent config (TODO)
+│   ├── opencode/       # OpenCode AI agent (skills, commands, plugins)
 │   ├── ripgrep/        # Search defaults
 │   └── tmux/           # Multiplexer + TPM plugins
 ├── home/.zshrc         # Shell config (p10k, plugins, aliases)
@@ -35,6 +35,9 @@ dotfiles/
 | Tmux binding | `home/.config/tmux/tmux.conf` |
 | Ghostty theme | `home/.config/ghostty/config` |
 | Ripgrep defaults | `home/.config/ripgrep/config` |
+| OpenCode config | `home/.config/opencode/opencode.json` |
+| OpenCode skills | `home/.config/opencode/skill/` |
+| OpenCode commands | `home/.config/opencode/command/` |
 
 ## CONVENTIONS
 
@@ -75,6 +78,7 @@ dot edit              # Open dotfiles in $EDITOR
 | Git | `config` | `pull.rebase`, bat as pager, nvim as editor |
 | Ghostty | `config` | Berkeley Mono font, laptop only |
 | Ripgrep | `config` | Smart-case, hidden files, ignores .git/ and node_modules/ |
+| OpenCode | `opencode.json` | MCP servers, permissions, keybinds, theme |
 
 ## NOTES
 

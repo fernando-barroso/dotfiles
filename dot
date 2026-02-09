@@ -105,9 +105,16 @@ cmd_update() {
     git -C "$DOT_DIR" pull --rebase
     success "Repo updated"
 
-    info "Running brew bundle..."
+    info "Running brew bundle (shared)..."
     brew bundle --file="$DOT_DIR/packages/Brewfile"
-    success "Packages updated"
+    success "Shared packages updated"
+
+    # Also update server packages if the server Brewfile was previously installed
+    if [[ -f "$DOT_DIR/packages/Brewfile.server" ]] && brew list --cask docker &>/dev/null; then
+        info "Running brew bundle (server)..."
+        brew bundle --file="$DOT_DIR/packages/Brewfile.server"
+        success "Server packages updated"
+    fi
 
     info "Re-linking dotfiles..."
     cmd_stow
@@ -119,15 +126,45 @@ cmd_update() {
 cmd_doctor() {
     header "Dotfiles Doctor"
 
-    local tools=(git nvim tmux node pnpm fzf rg fd bat eza zoxide btop lazygit direnv stow gh claude)
     local all_ok=true
 
+    # Homebrew is a hard dependency
+    echo -e "${BOLD}Checking Homebrew:${RESET}"
+    if command -v brew &>/dev/null; then
+        success "brew ($(brew --prefix))"
+    else
+        error "brew — not found (nothing else will work)"
+        all_ok=false
+    fi
+
+    echo ""
+    local tools=(git nvim tmux node pnpm fzf rg fd bat eza zoxide btop lazygit direnv stow gh claude jq wget tree ncdu)
     echo -e "${BOLD}Checking tools:${RESET}"
     for tool in "${tools[@]}"; do
         if command -v "$tool" &>/dev/null; then
             success "$tool"
         else
             error "$tool — not found"
+            all_ok=false
+        fi
+    done
+
+    echo ""
+    echo -e "${BOLD}Checking configs:${RESET}"
+    local configs=(
+        "$HOME/.zshrc"
+        "$HOME/.p10k.zsh"
+        "$HOME/.config/git/config"
+        "$HOME/.config/tmux/tmux.conf"
+        "$HOME/.config/ripgrep/config"
+        "$HOME/.config/ghostty/config"
+        "$HOME/.config/opencode/opencode.json"
+    )
+    for cfg in "${configs[@]}"; do
+        if [[ -e "$cfg" ]]; then
+            success "${cfg#$HOME/}"
+        else
+            warn "${cfg#$HOME/} — missing"
             all_ok=false
         fi
     done
@@ -176,16 +213,32 @@ cmd_backup() {
     timestamp=$(date +%Y%m%d-%H%M%S)
     local filename="backup-${name}-${timestamp}.tar.gz"
 
+    local paths=(
+        .zshrc
+        .p10k.zsh
+        .config/git
+        .config/ghostty
+        .config/tmux
+        .config/ripgrep
+        .config/opencode
+        .local/bin
+    )
+
+    # Filter to only paths that exist
+    local existing=()
+    for p in "${paths[@]}"; do
+        [[ -e "$HOME/$p" ]] && existing+=("$p")
+    done
+
+    if [[ ${#existing[@]} -eq 0 ]]; then
+        warn "No config files found to back up"
+        return 1
+    fi
+
     info "Creating backup: $filename"
     tar -czf "$backup_dir/$filename" \
         -C "$HOME" \
-        .zshrc \
-        .p10k.zsh \
-        .config/git \
-        .config/ghostty \
-        .config/tmux \
-        .config/ripgrep \
-        2>/dev/null || true
+        "${existing[@]}"
 
     success "Backup saved to $backup_dir/$filename"
 }
