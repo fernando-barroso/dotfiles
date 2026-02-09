@@ -35,6 +35,7 @@ brew "stow"
 # ─── JavaScript / TypeScript ────────────────────────────────
 brew "node"
 brew "pnpm"
+brew "bun"
 brew "typescript"
 
 # ─── LLM Tools ──────────────────────────────────────────────

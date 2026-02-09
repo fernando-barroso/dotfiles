@@ -56,6 +56,13 @@ cmd_init() {
     cmd_stow
     success "Dotfiles linked"
 
+    # OpenCode plugin deps (install in repo dir; stow links ~/.config/opencode to it)
+    if [[ -f "$DOT_DIR/home/.config/opencode/package.json" ]]; then
+        info "Installing OpenCode plugin dependencies (bun)..."
+        (cd "$DOT_DIR/home/.config/opencode" && bun install)
+        success "OpenCode plugin deps installed"
+    fi
+
     # TPM (Tmux Plugin Manager)
     if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
         info "Installing tmux plugin manager (tpm)..."
@@ -89,13 +96,6 @@ cmd_init() {
     fi
 
     header "Done!"
-    echo -e "Next steps:"
-    echo -e "  1. Update your email in ${BOLD}~/.config/git/config${RESET}"
-    echo -e "  2. Run ${BOLD}p10k configure${RESET} to set up your prompt"
-    echo -e "  3. Open tmux and press ${BOLD}Ctrl+A I${RESET} to install plugins"
-    if $server; then
-        echo -e "  4. Set up ${BOLD}Tailscale${RESET}: tailscale up"
-    fi
 }
 
 cmd_update() {
@@ -119,6 +119,12 @@ cmd_update() {
     info "Re-linking dotfiles..."
     cmd_stow
     success "Dotfiles re-linked"
+
+    if [[ -f "$DOT_DIR/home/.config/opencode/package.json" ]]; then
+        info "Installing OpenCode plugin dependencies (bun)..."
+        (cd "$DOT_DIR/home/.config/opencode" && bun install)
+        success "OpenCode plugin deps installed"
+    fi
 
     header "Update complete!"
 }
