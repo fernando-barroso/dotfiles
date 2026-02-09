@@ -65,10 +65,10 @@ cmd_init() {
         success "tpm already installed"
     fi
 
-    # Global npm packages
-    info "Installing global npm packages..."
-    pnpm add -g repomix
-    success "Global npm packages installed"
+    # Global pnpm packages (LLM tools not available via brew)
+    info "Installing global pnpm packages..."
+    pnpm add -g @anthropic-ai/claude-code opencode-ai repomix
+    success "Global pnpm packages installed"
 
     # Server-specific macOS settings
     if $server; then
@@ -138,7 +138,7 @@ cmd_doctor() {
     fi
 
     echo ""
-    local tools=(git nvim tmux node pnpm fzf rg fd bat eza zoxide btop lazygit direnv stow gh claude jq wget tree ncdu)
+    local tools=(git nvim tmux node pnpm fzf rg fd bat eza zoxide btop lazygit direnv stow gh claude opencode jq wget tree ncdu)
     echo -e "${BOLD}Checking tools:${RESET}"
     for tool in "${tools[@]}"; do
         if command -v "$tool" &>/dev/null; then

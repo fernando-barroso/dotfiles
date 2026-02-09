@@ -38,8 +38,9 @@ brew "pnpm"
 brew "typescript"
 
 # ─── LLM Tools ──────────────────────────────────────────────
-brew "claude-code"
-# repomix: install via pnpm add -g repomix
+# claude-code: pnpm add -g @anthropic-ai/claude-code
+# opencode:    pnpm add -g opencode-ai
+# repomix:     pnpm add -g repomix
 
 # ─── Optional ────────────────────────────────────────────────
 brew "neofetch"
