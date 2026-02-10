@@ -93,6 +93,27 @@ cmd_init() {
         info "Disabling Spotlight indexing..."
         sudo mdutil -a -i off
         success "Spotlight disabled"
+
+        # OpenCode headless server
+        header "Setting up OpenCode server"
+
+        local cred_dir="$HOME/.config/opencode/credentials"
+        local pw_file="$cred_dir/server_password"
+
+        mkdir -p "$cred_dir"
+
+        if [[ ! -f "$pw_file" ]]; then
+            read -sp "Enter OpenCode server password: " OC_PASS
+            echo
+            echo -n "$OC_PASS" > "$pw_file"
+            chmod 600 "$pw_file"
+            success "Password saved to $pw_file"
+        else
+            success "Password file already exists"
+        fi
+
+        launchctl load "$HOME/Library/LaunchAgents/com.opencode.server.plist"
+        success "OpenCode server running on port 4096"
     fi
 
     header "Done!"

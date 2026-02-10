@@ -13,6 +13,9 @@ dotfiles/
 │   ├── opencode/       # OpenCode AI agent (skills, commands, plugins)
 │   ├── ripgrep/        # Search defaults
 │   └── tmux/           # Multiplexer + TPM plugins
+├── home/Library/
+│   └── LaunchAgents/
+│       └── com.opencode.server.plist  # Headless OpenCode (server only)
 ├── home/.zshrc         # Shell config (p10k, plugins, aliases)
 ├── home/.p10k.zsh      # Powerlevel10k prompt config
 ├── home/.local/bin/    # Custom scripts
@@ -38,6 +41,7 @@ dotfiles/
 | OpenCode config | `home/.config/opencode/opencode.json` |
 | OpenCode skills | `home/.config/opencode/skill/` |
 | OpenCode commands | `home/.config/opencode/command/` |
+| OpenCode server | `home/Library/LaunchAgents/com.opencode.server.plist` |
 
 ## CONVENTIONS
 
@@ -87,3 +91,7 @@ dot edit              # Open dotfiles in $EDITOR
 - direnv auto-loads .envrc per project in ~/dev/
 - RIPGREP_CONFIG_PATH env var set in .zshrc
 - After editing any config, run `dot stow` to update symlinks
+- OpenCode server runs as a launchd service on port 4096 (server only)
+- Password stored at ~/.config/opencode/credentials/server_password (not in git)
+- Logs at /tmp/opencode-server.log and /tmp/opencode-server.err
+- Manage with: launchctl load/unload ~/Library/LaunchAgents/com.opencode.server.plist

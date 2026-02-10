@@ -8,6 +8,8 @@
 
 - **Separate Brewfiles**: `packages/Brewfile` contains everything shared across laptop and server (CLI tools, shell plugins, dev runtimes). `packages/Brewfile.server` adds only server-specific packages (Docker, Tailscale).
 
+- **LaunchAgents for persistent services**: OpenCode server runs as a launchd service on the Mac Mini, auto-starts on boot.
+
 - **Casks only install on non-server init**: GUI apps (Discord, Chrome, Obsidian, Raycast, Slack, Spotify, etc.) are listed as casks in the shared Brewfile. On the headless Mac Mini, `dot init --server` skips cask installation since GUI apps are irrelevant.
 
 - **Platform detection**: Homebrew path differs on Apple Silicon (`/opt/homebrew`) vs Intel (`/usr/local`). The `.zshrc` conditionally evaluates `/opt/homebrew/bin/brew shellenv` for Apple Silicon Macs.
@@ -47,5 +49,7 @@
 - **`dot update` only bundles the shared Brewfile**, not `Brewfile.server`. Server-specific packages are only installed during initial `dot init --server`.
 
 - **`dot backup <name>`** creates timestamped tarballs in `backups/` (gitignored). It archives configs from `$HOME` (the live symlink targets), not from the repo, so it captures the actual running state.
+
+- **OpenCode credentials stored outside dotfiles repo** at `~/.config/opencode/credentials/` (gitignored). Created interactively during `dot init --server`.
 
 - **tmux prefix is `Ctrl+A`** (rebound from default `Ctrl+B`). Pane navigation uses vim-style `h/j/k/l` bindings.
