@@ -4,6 +4,9 @@ set -euo pipefail
 # Wrapper for opencode headless server.
 # - Reads password from file (avoids process-list leak)
 # - Binds to Tailscale interface only
+# - Sets PATH for launchd (which has a minimal env)
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/Library/pnpm:$HOME/.local/bin:$PATH"
 
 PW_FILE="$HOME/.config/opencode/credentials/server_password"
 
