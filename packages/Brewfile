@@ -35,7 +35,8 @@ brew "stow"
 # ─── JavaScript / TypeScript ────────────────────────────────
 brew "node"
 brew "pnpm"
-brew "bun"
+tap "oven-sh/bun"
+brew "oven-sh/bun/bun"
 brew "typescript"
 
 # ─── LLM Tools ──────────────────────────────────────────────
@@ -57,4 +58,4 @@ cask "orbstack"
 cask "raycast"
 cask "slack"
 cask "spotify"
-cask "tailscale"
+cask "tailscale-app"
