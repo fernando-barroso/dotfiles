@@ -2,4 +2,3 @@
 # Install with: brew bundle --file=~/dotfiles/packages/Brewfile.server
 
 cask "docker"
-cask "tailscale"
