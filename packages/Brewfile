@@ -50,6 +50,7 @@ brew "speedtest-cli"
 # ─── Casks (GUI apps) ───────────────────────────────────────
 cask_args appdir: "/Applications"
 cask "discord"
+cask "ghostty"
 cask "google-chrome"
 cask "linear-linear"
 cask "obsidian"
