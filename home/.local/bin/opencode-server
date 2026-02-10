@@ -15,9 +15,29 @@ fi
 export OPENCODE_SERVER_PASSWORD
 OPENCODE_SERVER_PASSWORD=$(<"$PW_FILE")
 
-HOSTNAME=$(/opt/homebrew/bin/tailscale ip -4 2>/dev/null) || {
+# Resolve tailscale CLI: brew install or Mac app
+if command -v tailscale &>/dev/null; then
+    TS_CLI=tailscale
+elif [[ -x /opt/homebrew/bin/tailscale ]]; then
+    TS_CLI=/opt/homebrew/bin/tailscale
+elif [[ -x /Applications/Tailscale.app/Contents/MacOS/Tailscale ]]; then
+    TS_CLI=/Applications/Tailscale.app/Contents/MacOS/Tailscale
+else
+    echo "error: tailscale not found" >&2
+    exit 1
+fi
+
+HOSTNAME=$("$TS_CLI" ip -4 2>/dev/null) || {
     echo "error: failed to resolve tailscale IPv4 address" >&2
     exit 1
 }
 
-exec opencode serve --hostname "$HOSTNAME" --port 4096
+# Resolve opencode: pnpm global or PATH
+if command -v opencode &>/dev/null; then
+    exec opencode serve --hostname "$HOSTNAME" --port 4096
+elif [[ -x "$HOME/Library/pnpm/opencode" ]]; then
+    exec "$HOME/Library/pnpm/opencode" serve --hostname "$HOSTNAME" --port 4096
+else
+    echo "error: opencode not found" >&2
+    exit 1
+fi
