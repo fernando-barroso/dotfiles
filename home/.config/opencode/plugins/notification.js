@@ -1,5 +1,20 @@
-import { homedir } from "os";
+import { homedir, hostname } from "os";
 import { join } from "path";
+
+const REMOTE_HOST = "shadowfax";
+const SERVER_HOSTNAME = "minas-tirith";
+
+// Sound always plays on the laptop (shadowfax), never on the server.
+// - On laptop: afplay runs locally
+// - On server: SSH's to laptop to run afplay, silent fail if laptop unreachable
+const playSound = async ($, soundPath) => {
+  if (hostname() === SERVER_HOSTNAME) {
+    await $`ssh -o ConnectTimeout=2 -o BatchMode=yes ${REMOTE_HOST} afplay ${soundPath}`
+      .nothrow();
+  } else {
+    await $`afplay ${soundPath}`;
+  }
+};
 
 export const NotificationPlugin = async ({ $, client }) => {
   const soundPath = join(homedir(), ".config/opencode/sounds/soft-alert.mp3");
@@ -22,13 +37,13 @@ export const NotificationPlugin = async ({ $, client }) => {
       if (event.type === "session.idle") {
         const sessionID = event.properties.sessionID;
         if (await isMainSession(sessionID)) {
-          await $`afplay ${soundPath}`;
+          await playSound($, soundPath);
         }
       }
 
       // Permission prompt created
       if (event.type === "permission.asked") {
-        await $`afplay ${soundPath}`;
+        await playSound($, soundPath);
       }
     },
   };
