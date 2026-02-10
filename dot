@@ -72,11 +72,6 @@ cmd_init() {
         success "tpm already installed"
     fi
 
-    # Global pnpm packages (LLM tools not available via brew)
-    info "Installing global pnpm packages..."
-    pnpm add -g @anthropic-ai/claude-code opencode-ai repomix
-    success "Global pnpm packages installed"
-
     # Server-specific macOS settings
     if $server; then
         header "Applying server macOS settings"

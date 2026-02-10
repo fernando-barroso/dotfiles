@@ -40,9 +40,8 @@ brew "oven-sh/bun/bun"
 brew "typescript"
 
 # ─── LLM Tools ──────────────────────────────────────────────
-# claude-code: pnpm add -g @anthropic-ai/claude-code
-# opencode:    pnpm add -g opencode-ai
-# repomix:     pnpm add -g repomix
+tap "anomalyco/tap"
+brew "anomalyco/tap/opencode"
 
 # ─── Optional ────────────────────────────────────────────────
 brew "neofetch"
