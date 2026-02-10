@@ -8,7 +8,7 @@
 
 - **Separate Brewfiles**: `packages/Brewfile` contains everything shared across laptop and server (CLI tools, shell plugins, dev runtimes). `packages/Brewfile.server` adds only server-specific packages (Docker, Tailscale).
 
-- **LaunchAgents for persistent services**: OpenCode server runs as a launchd service on the Mac Mini, auto-starts on boot.
+- **LaunchAgents for persistent services**: OpenCode server runs as a launchd service on the Mac Mini, auto-starts on boot. A wrapper script (`~/.local/bin/opencode-server`) reads the password from file (avoiding process-list exposure) and resolves the Tailscale IP at launch via `tailscale ip -4`.
 
 - **Casks only install on non-server init**: GUI apps (Discord, Chrome, Obsidian, Raycast, Slack, Spotify, etc.) are listed as casks in the shared Brewfile. On the headless Mac Mini, `dot init --server` skips cask installation since GUI apps are irrelevant.
 

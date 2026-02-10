@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Wrapper for opencode headless server.
+# - Reads password from file (avoids process-list leak)
+# - Binds to Tailscale interface only
+
+PW_FILE="$HOME/.config/opencode/credentials/server_password"
+
+if [[ ! -f "$PW_FILE" ]]; then
+    echo "error: password file not found: $PW_FILE" >&2
+    exit 1
+fi
+
+export OPENCODE_SERVER_PASSWORD
+OPENCODE_SERVER_PASSWORD=$(<"$PW_FILE")
+
+HOSTNAME=$(/opt/homebrew/bin/tailscale ip -4 2>/dev/null) || {
+    echo "error: failed to resolve tailscale IPv4 address" >&2
+    exit 1
+}
+
+exec opencode serve --hostname "$HOSTNAME" --port 4096
