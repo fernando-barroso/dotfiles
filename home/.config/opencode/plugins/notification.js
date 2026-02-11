@@ -3,12 +3,13 @@ import { join } from "path";
 
 const REMOTE_HOST = "shadowfax";
 const SERVER_HOSTNAME = "minas-tirith";
+const isServer = hostname().toLowerCase().startsWith(SERVER_HOSTNAME);
 
 // Sound always plays on the laptop (shadowfax), never on the server.
 // - On laptop: afplay runs locally
 // - On server: SSH's to laptop to run afplay, silent fail if laptop unreachable
 const playSound = async ($, soundPath) => {
-  if (hostname() === SERVER_HOSTNAME) {
+  if (isServer) {
     await $`ssh -o ConnectTimeout=2 -o BatchMode=yes ${REMOTE_HOST} afplay ${soundPath}`
       .nothrow();
   } else {
