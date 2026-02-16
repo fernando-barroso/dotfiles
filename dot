@@ -136,6 +136,13 @@ cmd_update() {
     cmd_stow
     success "Dotfiles re-linked"
 
+    # Restart opencode server if the LaunchAgent is loaded (server only)
+    if launchctl list com.opencode.server &>/dev/null; then
+        info "Restarting OpenCode server..."
+        launchctl kickstart -k "gui/$(id -u)/com.opencode.server"
+        success "OpenCode server restarted"
+    fi
+
     if [[ -f "$DOT_DIR/home/.config/opencode/package.json" ]]; then
         info "Installing OpenCode plugin dependencies (bun)..."
         (cd "$DOT_DIR/home/.config/opencode" && bun install)
