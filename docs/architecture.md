@@ -59,3 +59,49 @@
 - **OpenCode credentials stored outside dotfiles repo** at `~/.config/opencode/credentials/` (gitignored). Created interactively during `dot init --server`.
 
 - **tmux prefix is `Ctrl+A`** (rebound from default `Ctrl+B`). Pane navigation uses vim-style `h/j/k/l` bindings.
+
+## Server Operations
+
+All operations performed from laptop via SSH (`ssh minas-tirith`).
+
+### Updating dotfiles
+```bash
+dot update        # pulls repo, brew bundle, restow, plugin deps
+dot doctor        # verify everything is healthy
+```
+
+If the OpenCode server wrapper script changed:
+```bash
+launchctl bootout gui/$(id -u)/com.opencode.server
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.opencode.server.plist
+```
+
+### Updating macOS
+Auto-install is disabled — updates are manual and intentional.
+```bash
+# check available updates
+softwareupdate -l
+
+# install a specific update (will reboot)
+sudo softwareupdate -i "update-name" --restart
+
+# or install all available
+sudo softwareupdate -ia --restart
+```
+The machine will reboot. With auto-login + Tailscale CLI daemon + autorestart pmset, it should come back online automatically. Verify after:
+```bash
+ssh minas-tirith dot doctor
+```
+
+### Updating Homebrew packages
+```bash
+brew update && brew upgrade
+sudo brew services restart tailscale    # if tailscale was upgraded
+dot doctor
+```
+
+### If server is unreachable
+1. Check if machine is on local network: `ping minas-tirith.local` (from same LAN)
+2. If reachable locally but no Tailscale: `ssh minas-tirith.local` then `sudo tailscale up`
+3. If not reachable at all: physical access needed — likely stuck at login screen or powered off
+4. After recovery, run `dot doctor` to verify all services
