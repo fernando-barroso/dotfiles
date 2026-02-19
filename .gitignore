@@ -2,3 +2,4 @@ backups/
 .DS_Store
 home/.config/opencode/node_modules/
 home/.config/opencode/credentials/
+home/Library/LaunchAgents/com.google.*
