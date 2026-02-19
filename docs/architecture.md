@@ -6,9 +6,9 @@
 
 - **XDG-compliant paths**: configs use `~/.config/` where the tool natively supports it. Git (`~/.config/git/`), tmux (`~/.config/tmux/`), ripgrep (`~/.config/ripgrep/`), Ghostty (`~/.config/ghostty/`), and opencode (`~/.config/opencode/`) all follow XDG conventions. Files that cannot move to XDG (`.zshrc`, `.p10k.zsh`, `.zsh_history`) remain at `~`.
 
-- **Separate Brewfiles**: `packages/Brewfile` contains everything shared across laptop and server (CLI tools, shell plugins, dev runtimes). `packages/Brewfile.server` adds only server-specific packages (Docker, Tailscale).
+- **Separate Brewfiles**: `packages/Brewfile` contains everything shared across laptop and server (CLI tools, shell plugins, dev runtimes, Tailscale GUI app). `packages/Brewfile.server` adds server-specific packages (Tailscale CLI daemon, Docker).
 
-- **LaunchAgents for persistent services**: OpenCode server runs as a launchd service on the Mac Mini, auto-starts on boot. A wrapper script (`~/.local/bin/opencode-server`) reads the password from file (avoiding process-list exposure) and resolves the Tailscale IP at launch via `tailscale ip -4`.
+- **LaunchAgents for persistent services**: OpenCode server runs as a launchd service on the Mac Mini, auto-starts on login. A wrapper script (`~/.local/bin/opencode-server`) reads the password from file (avoiding process-list exposure) and resolves the Tailscale IP at launch via `tailscale ip -4` with a 60-second retry loop (daemon may still be starting after boot).
 
 - **Casks only install on non-server init**: GUI apps (Discord, Chrome, Obsidian, Raycast, Slack, Spotify, etc.) are listed as casks in the shared Brewfile. On the headless Mac Mini, `dot init --server` skips cask installation since GUI apps are irrelevant.
 
@@ -32,11 +32,17 @@
 
 - **Git uses bat as pager**: `git config core.pager` is set to `bat --style=changes`, providing syntax-highlighted diffs.
 
-- **`dot doctor` checks 16 tools**: `git nvim tmux node pnpm fzf rg fd bat eza zoxide btop lazygit direnv stow gh claude`. It also scans `$HOME` (depth 3) for broken symlinks left by stow.
+- **`dot doctor` checks tools, configs, and symlinks**. On servers (detected by Docker cask presence), it also checks: pmset values, Tailscale connectivity, auto-login status, auto-update install disabled, and OpenCode server process.
 
 ## Non-obvious Implementation Details
 
-- **`dot init --server`** applies headless macOS settings via `systemsetup` and `launchctl`: disables system sleep, disables display sleep, enables SSH remote login, and disables Spotlight indexing. These are essential for an always-on Mac Mini.
+- **`dot init --server`** applies headless macOS settings: hardens pmset (disables sleep, auto-restarts after power loss, disables Power Nap and disk sleep), disables automatic macOS update installation, enables SSH remote login, and disables Spotlight indexing. After running, two manual steps are required:
+
+  1. **Disable FileVault**: `sudo fdesetup disable` — disk encryption prevents auto-login. Wait for decryption to finish (`fdesetup status` to check progress).
+  2. **Enable auto-login**: System Settings > Users & Groups > Automatic Login. Required so LaunchAgents (OpenCode server) start after reboot without manual login.
+  3. **Authenticate Tailscale CLI**: `sudo tailscale up` — one-time auth, opens a URL to approve the node.
+
+- **Tailscale runs as CLI daemon on server** (`brew "tailscale"` in `Brewfile.server`), not the GUI app. The CLI `tailscaled` runs as a system-level LaunchDaemon — starts at boot before user login, no GUI session needed. The laptop uses the GUI app (`cask "tailscale"` in shared Brewfile).
 
 - **Ghostty config only relevant on laptop**: the server is headless and renders no fonts or terminal UI. The Ghostty config is still stowed on the server (harmless), but only the laptop uses it.
 
@@ -46,7 +52,7 @@
 
 - **Stow is a single command**: `stow -d ~/dotfiles -t ~ home`. The `-d` flag sets the stow directory, `-t ~` sets the target, and `home` is the package. The `dot stow` wrapper adds `--restow` to prune stale symlinks.
 
-- **`dot update` only bundles the shared Brewfile**, not `Brewfile.server`. Server-specific packages are only installed during initial `dot init --server`.
+- **`dot update` bundles both Brewfiles on servers**: it detects server mode by checking if Docker cask is installed, and if so, also runs `Brewfile.server`.
 
 - **`dot backup <name>`** creates timestamped tarballs in `backups/` (gitignored). It archives configs from `$HOME` (the live symlink targets), not from the repo, so it captures the actual running state.
 
