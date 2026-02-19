@@ -18,19 +18,22 @@ fi
 export OPENCODE_SERVER_PASSWORD
 OPENCODE_SERVER_PASSWORD=$(<"$PW_FILE")
 
-# Resolve Tailscale IP: brew CLI or Mac app
-if command -v tailscale &>/dev/null; then
-    TS_CLI=tailscale
-elif [[ -x /Applications/Tailscale.app/Contents/MacOS/Tailscale ]]; then
-    TS_CLI=/Applications/Tailscale.app/Contents/MacOS/Tailscale
-else
-    echo "error: tailscale not found" >&2
+# Resolve Tailscale IP (retry — daemon may still be starting after boot)
+if ! command -v tailscale &>/dev/null; then
+    echo "error: tailscale CLI not found" >&2
     exit 1
 fi
 
-HOSTNAME=$("$TS_CLI" ip -4 2>/dev/null) || {
-    echo "error: failed to resolve tailscale IPv4 address" >&2
+HOSTNAME=""
+for i in {1..30}; do
+    HOSTNAME=$(tailscale ip -4 2>/dev/null) && break
+    echo "waiting for tailscale... attempt $i/30" >&2
+    sleep 2
+done
+
+if [[ -z "$HOSTNAME" ]]; then
+    echo "error: failed to resolve tailscale IPv4 address after 60s" >&2
     exit 1
-}
+fi
 
 exec opencode serve --hostname "$HOSTNAME" --port 4096

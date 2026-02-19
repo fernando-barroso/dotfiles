@@ -76,10 +76,18 @@ cmd_init() {
     if $server; then
         header "Applying server macOS settings"
 
-        info "Disabling sleep..."
-        sudo pmset -a disablesleep 1
-        sudo pmset -a sleep 0
-        success "Sleep disabled"
+        info "Hardening power management..."
+        sudo pmset -a disablesleep 1      # prevent sleep entirely
+        sudo pmset -a sleep 0             # system sleep timer: never
+        sudo pmset -a autorestart 1       # auto-boot after power loss
+        sudo pmset -a powernap 0          # disable Power Nap (unpredictable wakes)
+        sudo pmset -a disksleep 0         # never sleep disks
+        sudo pmset -a displaysleep 10     # display can sleep, machine stays awake
+        success "Power management hardened"
+
+        info "Disabling automatic macOS update installation..."
+        sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool false
+        success "Auto-install updates disabled (checks still enabled)"
 
         info "Enabling remote login (SSH)..."
         sudo systemsetup -setremotelogin on
@@ -109,6 +117,19 @@ cmd_init() {
 
         launchctl load "$HOME/Library/LaunchAgents/com.opencode.server.plist"
         success "OpenCode server running on port 4096"
+
+        # Tailscale CLI daemon
+        info "Starting Tailscale daemon..."
+        sudo brew services start tailscale 2>/dev/null || true
+        if ! tailscale status &>/dev/null; then
+            warn "Tailscale not authenticated. Run: sudo tailscale up"
+        else
+            success "Tailscale connected"
+        fi
+
+        header "Manual steps required"
+        warn "Enable auto-login: System Settings > Users & Groups > Automatic Login"
+        warn "  (required so LaunchAgents start after reboot)"
     fi
 
     header "Done!"
@@ -216,6 +237,63 @@ cmd_doctor() {
             [[ -n "$link" ]] && error "  $link"
         done
         all_ok=false
+    fi
+
+    # Server-specific checks (detect server by Docker cask presence)
+    if brew list --cask docker &>/dev/null 2>&1; then
+        echo ""
+        echo -e "${BOLD}Checking server health:${RESET}"
+
+        # pmset
+        local pmset_ok=true
+        for setting in "disablesleep 1" "sleep 0" "autorestart 1" "powernap 0" "disksleep 0"; do
+            local key="${setting% *}" val="${setting#* }"
+            local current
+            current=$(pmset -g | grep -w "$key" | awk '{print $2}') || true
+            if [[ "$current" == "$val" ]]; then
+                success "pmset $key = $val"
+            else
+                error "pmset $key = ${current:-?} (expected $val)"
+                pmset_ok=false
+                all_ok=false
+            fi
+        done
+
+        # Tailscale
+        if tailscale status &>/dev/null 2>&1; then
+            success "Tailscale connected"
+        else
+            error "Tailscale not connected"
+            all_ok=false
+        fi
+
+        # Auto-login
+        local auto_user
+        auto_user=$(sudo defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null) || true
+        if [[ -n "$auto_user" ]]; then
+            success "Auto-login enabled ($auto_user)"
+        else
+            warn "Auto-login not enabled (LaunchAgents won't start after reboot)"
+            all_ok=false
+        fi
+
+        # Auto-update install
+        local auto_update
+        auto_update=$(sudo defaults read /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates 2>/dev/null) || true
+        if [[ "$auto_update" == "0" ]]; then
+            success "Auto-install macOS updates disabled"
+        else
+            warn "Auto-install macOS updates enabled (risk of unplanned reboots)"
+            all_ok=false
+        fi
+
+        # OpenCode server
+        if pgrep -f "opencode serve" &>/dev/null; then
+            success "OpenCode server running"
+        else
+            error "OpenCode server not running"
+            all_ok=false
+        fi
     fi
 
     echo ""
