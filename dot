@@ -246,7 +246,7 @@ cmd_doctor() {
 
         # pmset
         local pmset_ok=true
-        for setting in "disablesleep 1" "sleep 0" "autorestart 1" "powernap 0" "disksleep 0"; do
+        for setting in "SleepDisabled 1" "sleep 0" "autorestart 1" "powernap 0" "disksleep 0"; do
             local key="${setting% *}" val="${setting#* }"
             local current
             current=$(pmset -g | grep -w "$key" | awk '{print $2}') || true
