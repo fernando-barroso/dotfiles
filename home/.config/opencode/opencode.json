@@ -113,14 +113,6 @@
     "edit": "allow",
     "webfetch": "ask"
   },
-  "theme": "system",
-  "keybinds": {
-    "leader": "ctrl+o",
-    "messages_half_page_up": "ctrl+u",
-    "messages_half_page_down": "ctrl+d",
-    "input_delete_to_line_start": "none",
-    "input_delete": "delete,shift+delete"
-  },
   "plugin": [],
   "mcp": {
     "context7": {
