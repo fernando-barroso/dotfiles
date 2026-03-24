@@ -94,8 +94,7 @@ Configs are merged together - project config overrides global config for conflic
 #### Setting a Default Model
 ```json
 {
-  "$schema": "opencode.ai/config.json",
-  "model": "anthropic/claude-sonnet-4-20250514"
+  "$schema": "opencode.ai/config.json"
 }
 ```
 
