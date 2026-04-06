@@ -21,6 +21,7 @@ brew "eza"
 brew "btop"
 brew "ncdu"
 brew "jq"
+brew "pandoc"
 
 # ─── Git ─────────────────────────────────────────────────────
 brew "lazygit"
