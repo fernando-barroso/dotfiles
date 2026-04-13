@@ -3,3 +3,5 @@ backups/
 home/.config/opencode/node_modules/
 home/.config/opencode/credentials/
 home/Library/LaunchAgents/com.google.*
+home/.local/bin/claude
+home/.claude/settings.local.json

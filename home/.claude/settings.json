@@ -1,0 +1,6 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir // .cwd // \"\"'); model=$(echo \"$input\" | jq -r '.model.display_name // \"\"'); used_pct=$(echo \"$input\" | jq -r '.context_window.used_percentage // empty'); short_cwd=\"${cwd/#$HOME/\\~}\"; git_info=\"\"; if git -C \"$cwd\" rev-parse --git-dir > /dev/null 2>&1; then branch=$(git -C \"$cwd\" -c core.fsmonitor=false symbolic-ref --short HEAD 2>/dev/null || git -C \"$cwd\" -c core.fsmonitor=false rev-parse --short HEAD 2>/dev/null); if [ -n \"$branch\" ]; then if ! git -C \"$cwd\" -c core.fsmonitor=false diff --quiet 2>/dev/null || ! git -C \"$cwd\" -c core.fsmonitor=false diff --cached --quiet 2>/dev/null; then git_info=\" $branch *\"; else git_info=\" $branch\"; fi; fi; fi; ctx_info=\"\"; if [ -n \"$used_pct\" ]; then printf -v ctx_rounded \"%.0f\" \"$used_pct\"; ctx_info=\" ctx:${ctx_rounded}%\"; fi; printf '%s%s  %s%s' \"$short_cwd\" \"$git_info\" \"$model\" \"$ctx_info\""
+  }
+}
