@@ -18,6 +18,10 @@ macos-titlebar-style = hidden
 # ─── Shell ───────────────────────────────────────────────────
 shell-integration = zsh
 
+# ─── Keybindings ──────────────────────────────────────────────
+# Make Shift+Enter visible to tmux/TUIs that treat Esc+Enter as newline.
+keybind = shift+enter=text:\x1b\r
+
 # ─── Cursor ──────────────────────────────────────────────────
 cursor-style = block
 cursor-style-blink = false
