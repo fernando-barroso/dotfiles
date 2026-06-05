@@ -135,7 +135,7 @@
     },
     "linear": {
       "type": "local",
-      "command": ["pnpx", "mcp-remote", "https://mcp.linear.app/sse"],
+      "command": ["pnpx", "mcp-remote", "https://mcp.linear.app/mcp"],
       "enabled": true
     },
     "figma-desktop": {
