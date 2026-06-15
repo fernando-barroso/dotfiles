@@ -2,6 +2,10 @@ backups/
 .DS_Store
 home/.config/opencode/node_modules/
 home/.config/opencode/credentials/
+home/.config/opencode/opencode.json.tui-migration.bak
+home/.config/opencode/package-lock.json
+home/.config/tmux/plugins/
 home/Library/LaunchAgents/com.google.*
 home/.local/bin/claude
+home/.local/bin/herdr
 home/.claude/settings.local.json
