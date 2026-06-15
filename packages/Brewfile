@@ -43,6 +43,7 @@ brew "typescript"
 # ─── LLM Tools ──────────────────────────────────────────────
 tap "anomalyco/tap"
 brew "anomalyco/tap/opencode"
+brew "herdr"
 
 # ─── Optional ────────────────────────────────────────────────
 brew "neofetch"
