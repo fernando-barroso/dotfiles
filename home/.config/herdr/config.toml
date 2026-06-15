@@ -1,0 +1,12 @@
+onboarding = false
+
+[keys]
+prefix = "ctrl+a"
+split_vertical = "prefix+|"
+detach = "prefix+d"
+
+[ui]
+agent_panel_scope = "all"
+
+[theme]
+name = "tokyo-night"
