@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/tui.json",
-  "theme": "system",
+  "theme": "opencode",
   "keybinds": {
     "leader": "ctrl+o",
     "messages_half_page_up": "ctrl+u",
