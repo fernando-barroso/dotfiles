@@ -2,4 +2,4 @@
 # Install with: brew bundle --file=~/dotfiles/packages/Brewfile.server
 
 brew "tailscale"       # CLI daemon — runs as system LaunchDaemon, no GUI session needed
-cask "docker"
+cask "docker-desktop"
